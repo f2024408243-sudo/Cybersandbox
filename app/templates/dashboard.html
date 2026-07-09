@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--cyan)">{{ user.points }}</div>
+      <div class="stat-label">Points</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--green)">{{ solved_ids|length }}</div>
+      <div class="stat-label">Tasks Done</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--pink)">{{ progress.values()|selectattr('completed')|list|length }}</div>
+      <div class="stat-label">Rooms Done</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--yellow)">{{ user_badges|length }}</div>
+      <div class="stat-label">Badges</div>
+    </div>
+  </div>
+</div>
+
+{% if user_badges %}
+<div class="mb-4 d-flex flex-wrap gap-2">
+  {% for ub in user_badges %}
+  <span style="background:#1a0a2a;border:1px solid #3a1a5a;color:#b06fff;font-size:0.78rem;padding:4px 12px;border-radius:20px">
+    {{ ub.badge.icon }} {{ ub.badge.name }}
+  </span>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% set beginner_done     = progress.values()|selectattr('completed')|selectattr('room_id', 'in', rooms|selectattr('difficulty','eq','Beginner')|map(attribute='id')|list)|list|length %}
+{% set all_beginner      = rooms|selectattr('difficulty','eq','Beginner')|list|length %}
+{% set intermediate_done = progress.values()|selectattr('completed')|list|length %}
+
+<h5 class="mb-1" style="color:var(--text-muted);font-size:0.75rem;text-transform:uppercase;letter-spacing:2px">Learning Rooms</h5>
+
+{% set ns = namespace(prev_diff='') %}
+
+{% for room in rooms %}
+
+{% set rp        = progress.get(room.id) %}
+{% set done_cnt  = rp.tasks_completed if rp else 0 %}
+{% set total     = room.tasks|length %}
+{% set pct       = ((done_cnt / total) * 100)|int if total > 0 else 0 %}
+{% set completed = rp and rp.completed %}
+
+{% set beginner_rooms     = rooms|selectattr('difficulty','eq','Beginner')|list %}
+{% set all_beg_done       = beginner_rooms|selectattr('id','in', progress.keys()|list)|list %}
+
+{% set beg_count     = rooms|selectattr('difficulty','eq','Beginner')|list|length %}
+{% set beg_completed = progress.values()|selectattr('completed')|list|length %}
+{% set int_count     = rooms|selectattr('difficulty','eq','Intermediate')|list|length %}
+
+{% set beginner_ids  = rooms|selectattr('difficulty','eq','Beginner')|map(attribute='id')|list %}
+{% set beg_done_count = 0 %}
+{% for bid in beginner_ids %}{% if progress.get(bid) and progress[bid].completed %}{% set beg_done_count = beg_done_count + 1 %}{% endif %}{% endfor %}
+
+{% set int_ids  = rooms|selectattr('difficulty','eq','Intermediate')|map(attribute='id')|list %}
+{% set int_done_count = 0 %}
+{% for iid in int_ids %}{% if progress.get(iid) and progress[iid].completed %}{% set int_done_count = int_done_count + 1 %}{% endif %}{% endfor %}
+
+{% set locked = false %}
+{% if room.difficulty == 'Intermediate' and beg_done_count < beg_count %}
+  {% set locked = true %}
+{% elif room.difficulty == 'Advanced' and int_done_count < int_count %}
+  {% set locked = true %}
+{% endif %}
+
+{% if ns.prev_diff != room.difficulty %}
+{% set ns.prev_diff = room.difficulty %}
+<div class="d-flex align-items-center gap-3 mt-4 mb-3">
+  <span class="badge-{{ room.difficulty|lower }} px-3 py-1 rounded" style="font-size:0.75rem;font-weight:500;text-transform:uppercase;letter-spacing:1px">
+    {{ room.difficulty }}
+  </span>
+  {% if room.difficulty == 'Intermediate' %}
+    <span style="font-size:0.75rem;color:var(--text-muted)">
+      {% if beg_done_count < beg_count %}
+        🔒 Complete all Beginner rooms to unlock ({{ beg_done_count }}/{{ beg_count }} done)
+      {% else %}
+        ✅ Unlocked
+      {% endif %}
+    </span>
+  {% elif room.difficulty == 'Advanced' %}
+    <span style="font-size:0.75rem;color:var(--text-muted)">
+      {% if int_done_count < int_count %}
+        🔒 Complete all Intermediate rooms to unlock ({{ int_done_count }}/{{ int_count }} done)
+      {% else %}
+        ✅ Unlocked
+      {% endif %}
+    </span>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="cs-card p-3 mb-3 {% if locked %}opacity-50{% endif %}" style="{% if not locked %}cursor:pointer{% else %}cursor:not-allowed{% endif %}{% if completed %};border-color:#1a3a2a{% endif %}">
+  <div class="d-flex align-items-start gap-3">
+
+    <div style="font-size:1.8rem;line-height:1;flex-shrink:0;margin-top:2px">{{ room.icon }}</div>
+
+    <div class="flex-grow-1">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div style="font-weight:500;font-size:0.95rem;margin-bottom:2px">
+            {{ room.title }}
+            {% if completed %}<span style="color:var(--green);font-size:0.78rem;margin-left:8px">✓ Complete</span>{% endif %}
+            {% if locked %}<span style="color:var(--text-muted);font-size:0.78rem;margin-left:8px">🔒 Locked</span>{% endif %}
+          </div>
+          <div style="font-size:0.8rem;color:var(--text-muted)">{{ room.category }} · {{ total }} tasks</div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge-{{ room.difficulty|lower }} px-2 py-1 rounded" style="font-size:0.7rem">{{ room.difficulty }}</span>
+          {% if not locked %}
+            <a href="/room/{{ room.id }}" class="btn-cs" style="font-size:0.78rem;padding:5px 14px;text-decoration:none">
+              {% if done_cnt > 0 and not completed %}Continue{% elif completed %}Review{% else %}Start{% endif %} →
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 mt-2">
+        <div class="cs-progress flex-grow-1">
+          <div class="cs-progress-fill" style="width:{{ pct }}%"></div>
+        </div>
+        <span style="font-size:0.75rem;color:var(--text-muted);flex-shrink:0;font-family:'JetBrains Mono',monospace">{{ done_cnt }}/{{ total }}</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endfor %}
+{% endblock %}

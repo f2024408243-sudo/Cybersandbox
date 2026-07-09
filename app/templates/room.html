@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<a href="/dashboard" class="btn-cs-outline mb-4 d-inline-block">← Back</a>
+
+<div class="cs-card p-4 mb-4">
+  <div class="d-flex align-items-center gap-3 mb-2">
+    <span style="font-size:2.5rem">{{ room.icon }}</span>
+    <div>
+      <h3 style="margin:0;font-weight:500">{{ room.title }}</h3>
+      <div class="d-flex gap-2 mt-1">
+        <span class="badge-{{ room.difficulty|lower }} px-2 py-1 rounded" style="font-size:0.72rem">{{ room.difficulty }}</span>
+        <span style="font-size:0.78rem;color:var(--text-muted);padding:4px 0">{{ room.category }}</span>
+      </div>
+    </div>
+  </div>
+  <p style="color:var(--text-muted);font-size:0.9rem;margin:0">{{ room.description }}</p>
+</div>
+
+<div class="d-flex flex-column gap-2">
+{% for task in tasks %}
+{% set done = task.id in solved_ids %}
+<a href="/room/{{ room.id }}/task/{{ task.id }}" style="text-decoration:none">
+  <div class="cs-card p-3 d-flex align-items-center gap-3" style="border-color:{% if done %}#1a3a2a{% else %}var(--border){% endif %}">
+    <div style="width:34px;height:34px;border-radius:50%;
+         background:{% if done %}var(--green){% else %}#1a1a28{% endif %};
+         border:1px solid {% if done %}var(--green){% else %}var(--border){% endif %};
+         display:flex;align-items:center;justify-content:center;
+         color:{% if done %}#000{% else %}var(--text-muted){% endif %};
+         font-size:0.8rem;font-family:'JetBrains Mono',monospace;flex-shrink:0">
+      {% if done %}✓{% else %}{{ '%02d'|format(task.order_index) }}{% endif %}
+    </div>
+    <div class="flex-grow-1">
+      <div style="font-size:0.9rem;color:{% if done %}var(--green){% else %}var(--text){% endif %}">{{ task.title }}</div>
+    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:{% if done %}var(--green){% else %}var(--text-muted){% endif %}">+{{ task.points }}pts</div>
+    <div style="color:var(--text-muted)">›</div>
+  </div>
+</a>
+{% endfor %}
+</div>
+{% endblock %}

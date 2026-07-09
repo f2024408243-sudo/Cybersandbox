@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+<div class="col-md-4">
+  <div class="cs-card p-4">
+    <div style="font-family:'JetBrains Mono',monospace;color:var(--cyan);font-size:0.75rem;
+         letter-spacing:2px;text-transform:uppercase;margin-bottom:1.5rem">
+      > Login
+    </div>
+    <form method="POST">
+      <div class="mb-3">
+        <label style="font-size:0.78rem;color:var(--text-muted);display:block;margin-bottom:6px">Email</label>
+        <input type="email" name="email" class="cs-input" required>
+      </div>
+      <div class="mb-4">
+        <label style="font-size:0.78rem;color:var(--text-muted);display:block;margin-bottom:6px">Password</label>
+        <input type="password" name="password" class="cs-input" required>
+      </div>
+      <button type="submit" class="btn-cs w-100">Login</button>
+    </form>
+    <p style="text-align:center;margin-top:1rem;font-size:0.82rem;color:var(--text-muted)">
+      No account? <a href="/register" style="color:var(--cyan)">Register here</a>
+    </p>
+  </div>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row g-4">
+
+  <div class="col-md-3">
+    <a href="/room/{{ room.id }}" class="btn-cs-outline d-block text-center mb-3">← {{ room.title }}</a>
+    <div class="d-flex flex-column gap-1">
+    {% for t in tasks %}
+    {% set done = t.id in solved_ids %}
+    <a href="/room/{{ room.id }}/task/{{ t.id }}" style="text-decoration:none">
+      <div style="padding:8px 12px;border-radius:6px;
+           background:{% if t.id==task.id %}#16161f{% else %}transparent{% endif %};
+           border-left:2px solid {% if done %}var(--green){% elif t.id==task.id %}var(--pink){% else %}var(--border){% endif %};
+           display:flex;align-items:center;gap:8px">
+        <span style="font-size:0.75rem;font-family:'JetBrains Mono',monospace;
+               color:{% if done %}var(--green){% elif t.id==task.id %}var(--pink){% else %}var(--text-muted){% endif %};
+               flex-shrink:0">
+          {% if done %}✓{% else %}{{ '%02d'|format(t.order_index) }}{% endif %}
+        </span>
+        <span style="font-size:0.78rem;color:{% if t.id==task.id %}var(--text){% else %}var(--text-muted){% endif %}">
+          {{ t.title }}
+        </span>
+      </div>
+    </a>
+    {% endfor %}
+    </div>
+  </div>
+
+  <div class="col-md-9">
+    <div class="cs-card p-4">
+      <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+          <div style="font-size:0.75rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;margin-bottom:4px">
+            Task {{ task.order_index }} of {{ tasks|length }}
+          </div>
+          <h4 style="margin:0;font-weight:500">{{ task.title }}</h4>
+        </div>
+        <span style="background:#1a1a00;border:1px solid #3a3a00;color:var(--yellow);
+               font-family:'JetBrains Mono',monospace;font-size:0.82rem;
+               padding:4px 12px;border-radius:20px;flex-shrink:0">
+          +{{ task.points }} pts
+        </span>
+      </div>
+
+      <div style="background:#0d0d14;border:1px solid var(--border);border-radius:8px;
+           padding:1.25rem;margin-bottom:1.5rem;line-height:1.85;font-size:0.93rem;
+           color:var(--text)">
+        {{ task.content }}
+      </div>
+
+      <div style="background:#0d1420;border:1px solid #1a2a40;border-radius:8px;
+           padding:1rem 1.25rem;margin-bottom:1.5rem">
+        <div style="font-size:0.75rem;color:var(--cyan);font-family:'JetBrains Mono',monospace;
+             text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Question</div>
+        <p style="margin:0;font-size:0.95rem">{{ task.question }}</p>
+      </div>
+
+      {% if already_solved %}
+      <div class="alert-success-cs">✓ Answered correctly!</div>
+      {% else %}
+      <div class="d-flex gap-2 mb-3">
+        <input type="text" id="flag-input" class="cs-input" placeholder="Your answer..." autofocus>
+        <button onclick="submitFlag()" class="btn-cs" style="white-space:nowrap;flex-shrink:0">Submit</button>
+      </div>
+      <div id="flag-result" style="margin-bottom:1rem"></div>
+
+      <button onclick="getHint()" class="btn-cs-outline" style="font-size:0.8rem">
+        💡 Hint
+      </button>
+      <div id="hint-box" style="display:none;margin-top:0.75rem;background:#1a1400;
+           border:1px solid #3a2e00;border-radius:8px;padding:0.75rem 1rem;
+           color:var(--yellow);font-size:0.88rem"></div>
+      {% endif %}
+
+      {% if attempts %}
+      <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem">
+        <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;
+             letter-spacing:1px;margin-bottom:0.5rem">Attempt history</div>
+        {% for a in attempts[:5] %}
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 0;
+             border-bottom:1px solid var(--border);font-size:0.82rem">
+          <span style="color:{% if a.is_correct %}var(--green){% else %}#ff6b6b{% endif %};flex-shrink:0">
+            {% if a.is_correct %}✓{% else %}✗{% endif %}
+          </span>
+          <code style="color:var(--text-muted);flex-grow:1">{{ a.submitted }}</code>
+          <span style="color:var(--text-muted);font-size:0.75rem;flex-shrink:0">
+            {{ a.attempted_at.strftime('%H:%M') }}
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="d-flex justify-content-between mt-4 pt-3" style="border-top:1px solid var(--border)">
+        {% if prev_task %}
+        <a href="/room/{{ room.id }}/task/{{ prev_task.id }}" class="btn-cs-outline">← Prev</a>
+        {% else %}<span></span>{% endif %}
+        {% if next_task %}
+        <a href="/room/{{ room.id }}/task/{{ next_task.id }}" class="btn-cs-outline">Next →</a>
+        {% else %}<span></span>{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function submitFlag() {
+    const flag = document.getElementById('flag-input').value.trim();
+    if (!flag) return;
+    fetch('/room/{{ room.id }}/task/{{ task.id }}', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'flag=' + encodeURIComponent(flag)
+    }).then(r => {
+        if (r.redirected) { window.location.href = r.url; }
+        else { window.location.reload(); }
+    });
+}
+document.getElementById('flag-input')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') submitFlag();
+});
+function getHint() {
+    fetch('/hint/{{ task.id }}').then(r => r.json()).then(d => {
+        const b = document.getElementById('hint-box');
+        b.style.display = 'block';
+        b.innerHTML = '💡 ' + d.hint;
+    });
+}
+</script>
+{% endblock %}

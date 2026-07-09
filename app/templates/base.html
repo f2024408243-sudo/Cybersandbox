@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CyberSandbox</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main:    #0a0a0f;
+            --bg-card:    #111118;
+            --bg-card2:   #16161f;
+            --pink:       #ff2d78;
+            --purple:     #7b2fff;
+            --cyan:       #00e5ff;
+            --green:      #00ff9d;
+            --yellow:     #ffe600;
+            --text:       #e8e8f0;
+            --text-muted: #6b6b80;
+            --border:     #1e1e2e;
+        }
+        * { font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-main); color: var(--text); min-height: 100vh; }
+        code, .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* navbar */
+        .navbar {
+            background: rgba(10,10,15,0.95);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            padding: 0.75rem 2rem;
+        }
+        .navbar-brand {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            font-size: 1.1rem;
+            color: var(--cyan) !important;
+            letter-spacing: 2px;
+        }
+        .nav-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            text-decoration: none;
+            transition: all 0.2s;
+            margin-left: 8px;
+        }
+        .nav-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+        .nav-btn-primary {
+            background: var(--pink);
+            border-color: var(--pink);
+            color: #fff !important;
+        }
+        .nav-btn-primary:hover { background: #ff5599; border-color: #ff5599; }
+
+        /* cards */
+        .cs-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .cs-card:hover { border-color: #2e2e42; transform: translateY(-1px); }
+
+        /* buttons */
+        .btn-cs {
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            border: none;
+            color: #fff;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            padding: 7px 18px;
+            transition: opacity 0.2s;
+        }
+        .btn-cs:hover { opacity: 0.85; color: #fff; }
+        .btn-cs-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            border-radius: 6px;
+            font-size: 0.82rem;
+            padding: 7px 18px;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+        .btn-cs-outline:hover { border-color: var(--cyan); color: var(--cyan); }
+
+        /* badges */
+        .badge-beginner     { background: #0d2a1a; color: var(--green);  border: 1px solid #1a4a2e; }
+        .badge-intermediate { background: #1a1a00; color: var(--yellow); border: 1px solid #3a3a00; }
+        .badge-advanced     { background: #2a0a1a; color: var(--pink);   border: 1px solid #4a1a2e; }
+        .badge-locked       { background: #111118; color: var(--text-muted); border: 1px solid var(--border); }
+
+        /* progress bar */
+        .cs-progress { background: #1e1e2e; border-radius: 99px; height: 4px; }
+        .cs-progress-fill { background: linear-gradient(90deg, var(--pink), var(--purple)); border-radius: 99px; height: 4px; transition: width 0.5s; }
+
+        /* alerts */
+        .alert-success-cs { background: #0d2a1a; color: var(--green);  border: 1px solid #1a4a2e; border-radius: 8px; padding: 12px 16px; }
+        .alert-danger-cs  { background: #2a0a0a; color: #ff6b6b;        border: 1px solid #4a1a1a; border-radius: 8px; padding: 12px 16px; }
+        .alert-info-cs    { background: #001a2a; color: var(--cyan);    border: 1px solid #003a4a; border-radius: 8px; padding: 12px 16px; }
+        .alert-warn-cs    { background: #1a1a00; color: var(--yellow);  border: 1px solid #3a3a00; border-radius: 8px; padding: 12px 16px; }
+
+        /* inputs */
+        .cs-input {
+            background: #0d0d14;
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+        .cs-input:focus { outline: none; border-color: var(--cyan); }
+        .cs-input::placeholder { color: var(--text-muted); }
+
+        /* stat cards */
+        .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; text-align: center; }
+        .stat-number { font-size: 2rem; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+        .stat-label  { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+        /* flash messages */
+        .flash-wrap { margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+<nav class="navbar d-flex justify-content-between align-items-center">
+    <a class="navbar-brand" href="/">&gt; CYBERSANDBOX</a>
+    <div>
+        {% if current_user.is_authenticated %}
+            <a href="/dashboard"   class="nav-btn">Dashboard</a>
+            <a href="/leaderboard" class="nav-btn">Leaderboard</a>
+            <a href="/profile"     class="nav-btn">{{ current_user.username }}</a>
+            <a href="/logout"      class="nav-btn" style="color:#ff6b6b;border-color:#4a1a1a">Logout</a>
+        {% else %}
+            <a href="/login"    class="nav-btn">Login</a>
+            <a href="/register" class="nav-btn nav-btn-primary">Join Free</a>
+        {% endif %}
+    </div>
+</nav>
+
+<div class="container-fluid px-4 py-4" style="max-width:1300px">
+    <div class="flash-wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="{% if category=='success' %}alert-success-cs{% elif category=='danger' %}alert-danger-cs{% elif category=='warning' %}alert-warn-cs{% else %}alert-info-cs{% endif %} mb-2">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endwith %}
+    </div>
+    {% block content %}{% endblock %}
+</div>
+</body>
+</html>

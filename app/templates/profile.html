@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h4 style="font-family:'JetBrains Mono',monospace;color:var(--cyan);margin-bottom:1.5rem">
+  > {{ user.username }}'s Profile
+</h4>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--cyan)">{{ user.points }}</div>
+      <div class="stat-label">Points</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--green)">{{ solves|length }}</div>
+      <div class="stat-label">Tasks Solved</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--pink)">{{ rooms_done|length }}</div>
+      <div class="stat-label">Rooms Done</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--yellow)">
+        {% if attempts > 0 %}{{ ((correct / attempts) * 100)|int }}%{% else %}0%{% endif %}
+      </div>
+      <div class="stat-label">Accuracy</div>
+    </div>
+  </div>
+</div>
+
+<!-- Badges -->
+<div class="cs-card p-4 mb-4">
+  <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;
+       letter-spacing:1px;margin-bottom:1rem">Badges Earned</div>
+  {% if user_badges %}
+  <div class="d-flex flex-wrap gap-2">
+    {% for ub in user_badges %}
+    <div style="background:#1a0a2a;border:1px solid #3a1a5a;border-radius:8px;padding:8px 16px">
+      <div style="font-size:1.2rem">{{ ub.badge.icon }}</div>
+      <div style="font-size:0.78rem;color:#b06fff;margin-top:2px">{{ ub.badge.name }}</div>
+      <div style="font-size:0.7rem;color:var(--text-muted)">{{ ub.badge.description }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p style="color:var(--text-muted);font-size:0.85rem;margin:0">
+    No badges yet — solve tasks to earn them!
+  </p>
+  {% endif %}
+</div>
+
+<!-- Recent Solves -->
+<div class="cs-card p-4">
+  <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;
+       letter-spacing:1px;margin-bottom:1rem">Recent Activity</div>
+  {% if solves %}
+  {% for s in solves[:10] %}
+  <div style="display:flex;align-items:center;gap:12px;padding:8px 0;
+       border-bottom:1px solid var(--border)">
+    <span style="color:var(--green);font-size:0.8rem">✓</span>
+    <span style="font-size:0.85rem;flex-grow:1">{{ s.task.title }}</span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;
+           color:var(--yellow)">+{{ s.points_earned }}pts</span>
+    <span style="font-size:0.75rem;color:var(--text-muted)">
+      {{ s.solved_at.strftime('%b %d, %H:%M') }}
+    </span>
+  </div>
+  {% endfor %}
+  {% else %}
+  <p style="color:var(--text-muted);font-size:0.85rem;margin:0">
+    No activity yet — start a room!
+  </p>
+  {% endif %}
+</div>
+
+{% endblock %}
